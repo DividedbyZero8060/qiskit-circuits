@@ -1,178 +1,62 @@
-# Advanced Quantum Gates and Circuits with Qiskit
+# Quantum Fourier Transform using Qiskit
 
-This repository provides an enhanced and extended implementation of quantum gates and circuits using the Qiskit library. It builds upon the fundamentals by introducing more advanced gates, sophisticated circuit constructions, and diverse simulation techniques. Each code block is accompanied by a detailed explanation to facilitate understanding.
+This project demonstrates the implementation of the Quantum Fourier Transform (QFT) using Qiskit, an open-source quantum computing software development framework.
 
-## Table of Contents
-- [Advanced Quantum Gates and Circuits with Qiskit](#advanced-quantum-gates-and-circuits-with-qiskit)
-  - [Table of Contents](#table-of-contents)
-    - [A Quick Refresher: The Basics](#a-quick-refresher-the-basics)
-    - [Expanding the Toolkit: Additional Quantum Gates](#expanding-the-toolkit-additional-quantum-gates)
-      - [1. Parameterized Gates: U, RX, RY, RZ Gates](#1-parameterized-gates-u-rx-ry-rz-gates)
-      - [2. Multi-Qubit Gates: SWAP and Toffoli (CCX) Gates](#2-multi-qubit-gates-swap-and-toffoli-ccx-gates)
-    - [Advanced Circuit Construction](#advanced-circuit-construction)
-      - [1. Creating Custom Gates](#1-creating-custom-gates)
-      - [2. Parameterized Quantum Circuits](#2-parameterized-quantum-circuits)
-    - [Exploring Different Simulators](#exploring-different-simulators)
+## What is the Fourier Transform?
 
----
+The Fourier Transform is a powerful mathematical tool that decomposes a function or a signal into its constituent frequencies. [8, 5] It essentially transforms a signal from the time domain to the frequency domain, which often simplifies analysis. [6, 14] This technique is fundamental in many fields, including signal processing, image analysis, and engineering. [5, 8] For example, it can be used to analyze the notes in a musical recording or to filter out unwanted noise. [9, 6]
 
-### A Quick Refresher: The Basics
+## The Quantum Fourier Transform (QFT)
 
-Quantum circuits are the fundamental building blocks of quantum programs. They consist of quantum bits (qubits) and the quantum gates that operate on them.
+The Quantum Fourier Transform is the quantum analog of the classical Discrete Fourier Transform. [1, 2] Instead of acting on a vector of numbers, the QFT acts on the amplitudes of a quantum state. [1] This transformation is a key component in many significant quantum algorithms, such as Shor's algorithm for factoring and quantum phase estimation. [1, 4] The primary advantage of the QFT is its efficiency; on a quantum computer, it can be performed exponentially faster than its classical counterpart. [1]
 
-Here is a simple two-qubit circuit that creates an entangled Bell state.
+The QFT transforms quantum states between the computational (Z) basis and the Fourier basis. For a single qubit, this is equivalent to the Hadamard gate. [4, 7]
 
-```python
-# Import necessary libraries from Qiskit
-from qiskit import QuantumCircuit, Aer, execute
-from qiskit.visualization import plot_histogram, plot_bloch_multivector
+## Implementation in Qiskit
 
-# Create a quantum circuit with 2 qubits and 2 classical bits
-qc_bell = QuantumCircuit(2, 2)
+This notebook walks through the process of building a QFT circuit and its inverse from the ground up using Qiskit.
 
-# Add a Hadamard gate on qubit 0 to create a superposition
-qc_bell.h(0)
+### Building the QFT Circuit
 
-# Add a CNOT gate with qubit 0 as the control and qubit 1 as the target
-qc_bell.cx(0, 1)
+The implementation is broken down into a few key functions:
 
-# Map the quantum measurement to the classical bits
-qc_bell.measure(,)
+1.  **`qft_rotations(circuit, n)`**: This function recursively applies the core logic of the QFT. It consists of a Hadamard gate followed by a series of controlled phase rotations on the qubits. [4] Each rotation's angle is progressively halved.
 
-# Draw the circuit
-print("Bell State Circuit:")
-print(qc_bell)
-```
+2.  **`swap_registers(circuit, n)`**: The QFT algorithm naturally outputs the qubits in a reversed order. This function applies a series of SWAP gates to reverse the order of the qubits and obtain the correct final state.
 
-**Explanation:**
-*   `QuantumCircuit(2, 2)` initializes a circuit with two qubits and two classical bits.
-*   `h(0)` applies a Hadamard gate to the first qubit, putting it into a superposition.
-*   `cx(0, 1)` applies a CNOT gate, creating entanglement.
-*   `measure([0,1], [0,1])` measures the qubits and stores the results in classical bits.
+3.  **`qft(circuit, n)`**: This function combines the rotation and swap operations to perform the full QFT on the first `n` qubits of a given circuit.
 
----
+4.  **`inverse_qft(circuit, n)`**: This creates the inverse of the QFT circuit. The inverse QFT is crucial for algorithms where the QFT is used as an intermediate step, allowing a return to the computational basis. [7]
 
-### Expanding the Toolkit: Additional Quantum Gates
+The notebook demonstrates these steps by:
+*   Initializing a quantum state, for example, the state `|101⟩` which represents the number 5.
+*   Applying the `qft` function to this state.
+*   Visualizing the resulting statevector on Bloch spheres using `plot_bloch_multivector`.
+*   Applying the `inverse_qft` function to show that the initial state `|101⟩` is recovered.
+*   Preparing the circuit to be run on a real quantum backend or a simulator.
 
-Beyond the basic gates, Qiskit offers a rich set of more advanced gates.
+### Running on an IBM Quantum Backend
 
-#### 1. Parameterized Gates: U, RX, RY, RZ Gates
+The code includes the necessary steps to run the circuit on a real quantum device through IBM Quantum. This involves:
+*   Authenticating the account using `QiskitRuntimeService`.
+*   Selecting the least busy backend.
+*   Transpiling the circuit for the target backend to optimize the gates for the specific hardware.
+*   Using a `BackendSampler` to run the circuit and get the measurement results.
 
-These gates perform rotations and their action depends on classical parameters.
+![QiskIT IBM Runtime](https://unidebhu-my.sharepoint.com/:i:/g/personal/ashraf_mahdi8060_mailbox_unideb_hu/IQCq4pcEyb_iR7x7HZWjupywAdC9vanAY6qviZWiyPwVpFs?e=41Y91v)
 
-```python
-import numpy as np
+### Results
 
-qc_param = QuantumCircuit(1)
-qc_param.rx(np.pi/2, 0) # Rotate around X-axis by pi/2
-qc_param.ry(np.pi/3, 0) # Rotate around Y-axis by pi/3
-qc_param.rz(np.pi/4, 0) # Rotate around Z-axis by pi/4
+When the initial state `|101⟩` is prepared, and the QFT followed by the inverse QFT is applied, the final measurement should ideally yield the state `101` with 100% probability. However, due to noise in real quantum hardware and statistical noise in simulators, the output is probabilistic, with the correct state having the highest probability.
 
-print("Parameterized Gates Circuit:")
-print(qc_param)
-
-# Visualize the final state
-backend = Aer.get_backend('statevector_simulator')
-statevector = execute(qc_param, backend).result().get_statevector()
-plot_bloch_multivector(statevector)
-```
-
-#### 2. Multi-Qubit Gates: SWAP and Toffoli (CCX) Gates
-
-*   **SWAP Gate:** Swaps the states of two qubits.
-*   **Toffoli Gate (CCX):** A doubly-controlled NOT gate, universal for classical computation.
-
-```python
-qc_multi = QuantumCircuit(3)
-
-# Initialize the qubits to |011>
-qc_multi.x(1)
-qc_multi.x(2)
-qc_multi.barrier()
-
-# Apply a SWAP gate
-qc_multi.swap(0, 1)
-qc_multi.barrier()
-
-# Apply a Toffoli gate
-qc_multi.ccx(0, 1, 2)
-
-print("Multi-Qubit Gates Circuit:")
-print(qc_multi)
-```
+![Probabilistic Output](https://unidebhu-my.sharepoint.com/:i:/g/personal/ashraf_mahdi8060_mailbox_unideb_hu/IQCoDn1NPcVfRqZnN-bmClpgAfjiouufFlEoyc99GcDRTR4?e=UWwN3b)
 
 ---
 
-### Advanced Circuit Construction
+## Presentation Participants
 
-#### 1. Creating Custom Gates
-
-Group a sequence of gates into a single, reusable custom gate.
-
-```python
-# Create a small circuit for the custom gate
-sub_circuit = QuantumCircuit(2, name='my_gate')
-sub_circuit.h(0)
-sub_circuit.cx(0, 1)
-my_gate = sub_circuit.to_gate()
-
-# Use the custom gate in a larger circuit
-qc_custom = QuantumCircuit(3)
-qc_custom.append(my_gate,)
-qc_custom.append(my_gate,)
-
-print("Circuit with a Custom Gate:")
-print(qc_custom)
-```
-
-#### 2. Parameterized Quantum Circuits
-
-Create circuits with placeholder parameters that can be assigned values later. This is essential for variational algorithms.
-
-```python
-from qiskit.circuit import Parameter
-
-theta = Parameter('θ')
-qc_pqc = QuantumCircuit(1)
-qc_pqc.h(0)
-qc_pqc.rz(theta, 0)
-
-print("Parameterized Quantum Circuit:")
-print(qc_pqc)
-
-# Bind the parameter to a specific value
-bound_circuit = qc_pqc.bind_parameters({theta: np.pi/2})
-print("\nCircuit with Bound Parameter:")
-print(bound_circuit)
-```
-
----
-
-### Exploring Different Simulators
-
-Qiskit's `Aer` module provides several powerful backends for simulation.
-
-*   **`qasm_simulator`:** Mimics a real quantum computer by performing repeated measurements (shots).
-*   **`unitary_simulator`:** Calculates the unitary matrix that represents the circuit's transformation.
-
-```python
-qc_bell_no_meas = QuantumCircuit(2)
-qc_bell_no_meas.h(0)
-qc_bell_no_meas.cx(0, 1)
-
-# 1. Use the qasm_simulator
-qasm_sim = Aer.get_backend('qasm_simulator')
-qc_to_run = qc_bell_no_meas.copy()
-qc_to_run.measure_all()
-result_qasm = execute(qc_to_run, qasm_sim, shots=1024).result()
-counts = result_qasm.get_counts()
-print("Counts from qasm_simulator:")
-plot_histogram(counts)
-
-# 2. Use the unitary_simulator
-unitary_sim = Aer.get_backend('unitary_simulator')
-result_unitary = execute(qc_bell_no_meas, unitary_sim).result()
-unitary = result_unitary.get_unitary()
-print("\nUnitary matrix from unitary_simulator:")
-print(np.round(unitary, 3))
-```
+| Name | Neptune ID |
+| :--- | :--- |
+| Ashraf Mahdi | F8FOX0 |
+| Jawad Bin Jahangir | JF2A45 |
+| Burak Işık | C9MMAE |
