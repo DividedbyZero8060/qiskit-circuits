@@ -43,13 +43,13 @@ The code includes the necessary steps to run the circuit on a real quantum devic
 *   Transpiling the circuit for the target backend to optimize the gates for the specific hardware.
 *   Using a `BackendSampler` to run the circuit and get the measurement results.
 
-![QiskIT IBM Runtime](https://unidebhu-my.sharepoint.com/:i:/g/personal/ashraf_mahdi8060_mailbox_unideb_hu/IQCq4pcEyb_iR7x7HZWjupywAdC9vanAY6qviZWiyPwVpFs?e=41Y91v)
+![QiskIT IBM Runtime](images/quantum_output_ibm_1.png)
 
 ### Results
 
 When the initial state `|101⟩` is prepared, and the QFT followed by the inverse QFT is applied, the final measurement should ideally yield the state `101` with 100% probability. However, due to noise in real quantum hardware and statistical noise in simulators, the output is probabilistic, with the correct state having the highest probability.
 
-![Probabilistic Output](https://unidebhu-my.sharepoint.com/:i:/g/personal/ashraf_mahdi8060_mailbox_unideb_hu/IQCoDn1NPcVfRqZnN-bmClpgAfjiouufFlEoyc99GcDRTR4?e=UWwN3b)
+![Probabilistic Output](images/quantum_output_ibm_2.png)
 
 ---
 
